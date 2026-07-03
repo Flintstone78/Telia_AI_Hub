@@ -41,6 +41,7 @@ const STATUS_STYLE: Record<
 };
 
 const HUB_ID = "__hub__";
+const PEBBLE_ASPECT = 538 / 512; // höjd/bredd för telia-pebble.png
 
 // Deterministisk pseudo-slump så partikelmolnet blir likadant varje render
 function mulberry32(seed: number) {
@@ -53,7 +54,7 @@ function mulberry32(seed: number) {
   };
 }
 
-function buildLayout(nodes: Node[]) {
+function buildGraph(nodes: Node[]) {
   const simNodes: SimNode[] = [
     { id: HUB_ID, name: "NAVET", status: "hub", fx: 0, fy: 0, phase: 0 },
     ...nodes.map((n, i) => {
@@ -82,28 +83,6 @@ function buildLayout(nodes: Node[]) {
       links.push({ source: n.id, target: c });
     }
   }
-
-  const sim = forceSimulation(simNodes)
-    .force(
-      "link",
-      forceLink<SimNode, SimLink>(links)
-        .id((d) => d.id)
-        .distance((l) => {
-          const t = l.target as SimNode;
-          if ((l.source as SimNode).id === HUB_ID) {
-            return t.status === "live" ? 150 : t.status === "beta" ? 175 : 210;
-          }
-          return 130;
-        })
-        .strength(0.5)
-    )
-    .force("charge", forceManyBody().strength(-450))
-    .force("collide", forceCollide(48))
-    .force("x", forceX(0).strength(0.045))
-    .force("y", forceY(0).strength(0.06))
-    .stop();
-
-  sim.tick(300);
   return { simNodes, links };
 }
 
@@ -150,7 +129,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; node: Node } | null>(null);
 
-  const layout = useMemo(() => buildLayout(nodes), [nodes]);
+  const graph = useMemo(() => buildGraph(nodes), [nodes]);
   const scene = useMemo(() => buildParticles(), []);
 
   // Muterbart tillstånd som render-loopen läser utan att trigga React
@@ -174,6 +153,34 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
     let height = 0;
     let raf = 0;
 
+    // Telia-pebblen i mitten
+    const pebble = new Image();
+    pebble.src = "/telia-pebble.png";
+
+    // Levande simulering: startar nästan färdiglagd och mjuklandar,
+    // väcks igen när man drar i en nod
+    const sim = forceSimulation(graph.simNodes)
+      .force(
+        "link",
+        forceLink<SimNode, SimLink>(graph.links)
+          .id((d) => d.id)
+          .distance((l) => {
+            const t = l.target as SimNode;
+            if ((l.source as SimNode).id === HUB_ID) {
+              return t.status === "live" ? 150 : t.status === "beta" ? 175 : 210;
+            }
+            return 130;
+          })
+          .strength(0.5)
+      )
+      .force("charge", forceManyBody().strength(-450))
+      .force("collide", forceCollide(48))
+      .force("x", forceX(0).strength(0.045))
+      .force("y", forceY(0).strength(0.06))
+      .stop();
+    sim.tick(150);
+    sim.alpha(0.5).alphaMin(0.001).restart();
+
     const resize = () => {
       width = container.clientWidth;
       height = container.clientHeight;
@@ -186,7 +193,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
 
     const fit = () => {
       let minX = -60, maxX = 60, minY = -60, maxY = 60;
-      for (const n of layout.simNodes) {
+      for (const n of graph.simNodes) {
         // Label-pillen ritas bort från centrum — ge plats åt rätt håll
         const x = n.x ?? 0;
         minX = Math.min(minX, x < 0 ? x - 150 : x - 40);
@@ -221,10 +228,12 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
       );
     };
 
+    let dragNode: SimNode | null = null;
+
     const floatX = (n: SimNode, t: number) =>
-      n.status === "hub" ? 0 : Math.sin(t * 0.35 + n.phase) * 3.5;
+      n.status === "hub" || n === dragNode ? 0 : Math.sin(t * 0.35 + n.phase) * 3.5;
     const floatY = (n: SimNode, t: number) =>
-      n.status === "hub" ? 0 : Math.cos(t * 0.3 + n.phase * 1.3) * 3.5;
+      n.status === "hub" || n === dragNode ? 0 : Math.cos(t * 0.3 + n.phase * 1.3) * 3.5;
 
     const draw = (now: number) => {
       const t = now / 1000;
@@ -254,17 +263,18 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         ctx.fill();
       }
 
-      // Länkar mellan noder (svagt böjda linjer)
-      for (const l of layout.links) {
+      // Länkar mellan noder (svagt böjda, pulserande linjer)
+      for (const l of graph.links) {
         const a = l.source as SimNode;
         const b = l.target as SimNode;
         const pa = toScreen((a.x ?? 0) + floatX(a, t), (a.y ?? 0) + floatY(a, t));
         const pb = toScreen((b.x ?? 0) + floatX(b, t), (b.y ?? 0) + floatY(b, t));
         const mx = (pa.x + pb.x) / 2 - (pb.y - pa.y) * 0.12;
         const my = (pa.y + pb.y) / 2 + (pb.x - pa.x) * 0.12;
+        const pulse = 0.8 + 0.2 * Math.sin(t * 1.5 + (a.phase + b.phase));
         const grad = ctx.createLinearGradient(pa.x, pa.y, pb.x, pb.y);
-        grad.addColorStop(0, "rgba(180, 79, 234, 0.28)");
-        grad.addColorStop(1, "rgba(153, 10, 227, 0.10)");
+        grad.addColorStop(0, `rgba(180, 79, 234, ${0.28 * pulse})`);
+        grad.addColorStop(1, `rgba(153, 10, 227, ${0.1 * pulse})`);
         ctx.strokeStyle = grad;
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -273,49 +283,30 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         ctx.stroke();
       }
 
-      // Central hjärn-sfär (Telia-sfär med swirl)
-      const hub = layout.simNodes[0];
+      // Central Telia-pebble med glöd
+      const hub = graph.simNodes[0];
       const hs = toScreen(hub.x ?? 0, hub.y ?? 0);
-      const hr = 34 * k * (1 + 0.03 * Math.sin(t * 1.2));
-      const glow = ctx.createRadialGradient(hs.x, hs.y, hr * 0.3, hs.x, hs.y, hr * 3.4);
-      glow.addColorStop(0, "rgba(153, 10, 227, 0.5)");
-      glow.addColorStop(0.5, "rgba(153, 10, 227, 0.12)");
+      const pw = 64 * k * (1 + 0.025 * Math.sin(t * 1.2)); // pebble-bredd, mjuk puls
+      const glowR = pw * 1.9;
+      const glow = ctx.createRadialGradient(hs.x, hs.y, pw * 0.25, hs.x, hs.y, glowR);
+      glow.addColorStop(0, "rgba(153, 10, 227, 0.55)");
+      glow.addColorStop(0.5, "rgba(153, 10, 227, 0.14)");
       glow.addColorStop(1, "rgba(153, 10, 227, 0)");
       ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(hs.x, hs.y, hr * 3.4, 0, Math.PI * 2);
+      ctx.arc(hs.x, hs.y, glowR, 0, Math.PI * 2);
       ctx.fill();
-
-      const sphere = ctx.createRadialGradient(
-        hs.x - hr * 0.35, hs.y - hr * 0.35, hr * 0.15,
-        hs.x, hs.y, hr
-      );
-      sphere.addColorStop(0, "#CC88F0");
-      sphere.addColorStop(0.45, "#990AE3");
-      sphere.addColorStop(1, "#570080");
-      ctx.fillStyle = sphere;
-      ctx.beginPath();
-      ctx.arc(hs.x, hs.y, hr, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Vita swirl-linjer över sfären
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(hs.x, hs.y, hr, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.strokeStyle = "rgba(255,255,255,0.9)";
-      ctx.lineWidth = Math.max(1.5, hr * 0.09);
-      ctx.beginPath();
-      ctx.ellipse(hs.x, hs.y - hr * 0.15, hr * 1.05, hr * 0.42, -0.35, 0.2, Math.PI - 0.2);
-      ctx.stroke();
-      ctx.strokeStyle = "rgba(255,255,255,0.55)";
-      ctx.beginPath();
-      ctx.ellipse(hs.x, hs.y + hr * 0.2, hr * 1.0, hr * 0.36, -0.35, 0.4, Math.PI - 0.4);
-      ctx.stroke();
-      ctx.restore();
+      if (pebble.complete && pebble.naturalWidth > 0) {
+        const ph = pw * PEBBLE_ASPECT;
+        ctx.save();
+        ctx.shadowColor = "rgba(204, 136, 240, 0.8)";
+        ctx.shadowBlur = 22 * k;
+        ctx.drawImage(pebble, hs.x - pw / 2, hs.y - ph / 2, pw, ph);
+        ctx.restore();
+      }
 
       // Verktygsnoder + label-pills
-      for (const n of layout.simNodes) {
+      for (const n of graph.simNodes) {
         if (n.status === "hub") continue;
         const data = nodeById.get(n.id);
         if (!data) continue;
@@ -323,16 +314,18 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         const dim = matches(data) ? 1 : 0.15;
         const hovered = hoveredRef.current === n.id;
         const selected = selectedRef.current === n.id;
+        const dragged = dragNode === n;
         const p = toScreen((n.x ?? 0) + floatX(n, t), (n.y ?? 0) + floatY(n, t));
-        const r = style.r * k * (hovered || selected ? 1.25 : 1);
+        const r = style.r * k * (hovered || selected || dragged ? 1.25 : 1);
 
         ctx.globalAlpha = dim;
-        const halo = ctx.createRadialGradient(p.x, p.y, r * 0.4, p.x, p.y, r * (hovered || selected ? 4.5 : 3.2));
+        const haloR = r * (hovered || selected || dragged ? 4.5 : 3.2) * (1 + 0.06 * Math.sin(t * 1.8 + n.phase));
+        const halo = ctx.createRadialGradient(p.x, p.y, r * 0.4, p.x, p.y, haloR);
         halo.addColorStop(0, style.halo);
         halo.addColorStop(1, "rgba(153,10,227,0)");
         ctx.fillStyle = halo;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r * 4.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, haloR, 0, Math.PI * 2);
         ctx.fill();
 
         const g = ctx.createRadialGradient(p.x - r * 0.3, p.y - r * 0.3, r * 0.1, p.x, p.y, r);
@@ -366,45 +359,45 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         ctx.font = `500 ${fontSize}px ${fontFamily}`;
         const tw = ctx.measureText(data.name).width;
         const padX = 10;
-        const ph = fontSize + 12;
+        const ph2 = fontSize + 12;
         const gap = r + 10;
         const left = (n.x ?? 0) < 0;
         const px = left ? p.x - gap - tw - padX * 2 : p.x + gap;
-        const py = p.y - ph / 2;
+        const py = p.y - ph2 / 2;
         ctx.fillStyle = hovered || selected ? "rgba(61,0,89,0.92)" : "rgba(18,6,33,0.82)";
         ctx.strokeStyle = hovered || selected ? "rgba(204,136,240,0.7)" : "rgba(180,79,234,0.30)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.roundRect(px, py, tw + padX * 2, ph, ph / 2);
+        ctx.roundRect(px, py, tw + padX * 2, ph2, ph2 / 2);
         ctx.fill();
         ctx.stroke();
         ctx.fillStyle = hovered || selected ? "#F4E0FF" : "rgba(244,224,255,0.85)";
         ctx.textBaseline = "middle";
-        ctx.fillText(data.name, px + padX, py + ph / 2 + 0.5);
+        ctx.fillText(data.name, px + padX, py + ph2 / 2 + 0.5);
         ctx.globalAlpha = 1;
       }
 
       raf = requestAnimationFrame(draw);
     };
 
-    // Träffyta: nod eller label-pill
-    const hitTest = (sx: number, sy: number): string | null => {
+    // Träffyta: nod (inkl. lite marginal)
+    const hitTest = (sx: number, sy: number): SimNode | null => {
       const t = performance.now() / 1000;
-      for (const n of layout.simNodes) {
+      for (const n of graph.simNodes) {
         if (n.status === "hub") continue;
         const p = toScreen((n.x ?? 0) + floatX(n, t), (n.y ?? 0) + floatY(n, t));
         const style = STATUS_STYLE[n.status as NodeStatus];
         const r = Math.max(style.r * view.current.k + 8, 16);
         const dx = sx - p.x;
         const dy = sy - p.y;
-        if (dx * dx + dy * dy < r * r) return n.id;
+        if (dx * dx + dy * dy < r * r) return n;
       }
       return null;
     };
 
-    // Interaktion: pan-drag, pinch-zoom, hover, klick
+    // Interaktion: dra noder, panorera, pinch-zooma, hovra, klicka
     const pointers = new Map<number, { x: number; y: number }>();
-    let dragStart: { x: number; y: number; panX: number; panY: number } | null = null;
+    let panStart: { x: number; y: number; panX: number; panY: number } | null = null;
     let pinchStart: { dist: number; k: number } | null = null;
     let moved = false;
 
@@ -419,11 +412,28 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
       pointers.set(e.pointerId, p);
       moved = false;
       if (pointers.size === 1) {
-        dragStart = { ...p, panX: view.current.panX, panY: view.current.panY };
+        const hit = hitTest(p.x, p.y);
+        if (hit) {
+          // Greppa noden — simuleringen vaknar och resten av grafen följer med
+          dragNode = hit;
+          const w = toWorld(p.x, p.y);
+          dragNode.fx = w.x;
+          dragNode.fy = w.y;
+          sim.alphaTarget(0.25).restart();
+          canvas.style.cursor = "grabbing";
+        } else {
+          panStart = { ...p, panX: view.current.panX, panY: view.current.panY };
+        }
       } else if (pointers.size === 2) {
         const [a, b] = [...pointers.values()];
         pinchStart = { dist: Math.hypot(a.x - b.x, a.y - b.y), k: view.current.k };
-        dragStart = null;
+        if (dragNode) {
+          dragNode.fx = null;
+          dragNode.fy = null;
+          dragNode = null;
+          sim.alphaTarget(0);
+        }
+        panStart = null;
       }
     };
 
@@ -438,20 +448,28 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         moved = true;
         return;
       }
-      if (dragStart && pointers.size === 1) {
-        const dx = p.x - dragStart.x;
-        const dy = p.y - dragStart.y;
+      if (dragNode && pointers.size === 1) {
+        const w = toWorld(p.x, p.y);
+        dragNode.fx = w.x;
+        dragNode.fy = w.y;
+        moved = true;
+        setTooltip(null);
+        return;
+      }
+      if (panStart && pointers.size === 1) {
+        const dx = p.x - panStart.x;
+        const dy = p.y - panStart.y;
         if (Math.abs(dx) + Math.abs(dy) > 4) moved = true;
-        view.current.panX = dragStart.panX + dx;
-        view.current.panY = dragStart.panY + dy;
+        view.current.panX = panStart.panX + dx;
+        view.current.panY = panStart.panY + dy;
         return;
       }
       // Hover (mus)
-      const id = hitTest(p.x, p.y);
-      hoveredRef.current = id;
-      canvas.style.cursor = id ? "pointer" : "grab";
-      if (id) {
-        const node = nodeById.get(id);
+      const hit = hitTest(p.x, p.y);
+      hoveredRef.current = hit?.id ?? null;
+      canvas.style.cursor = hit ? "grab" : "default";
+      if (hit) {
+        const node = nodeById.get(hit.id);
         if (node) setTooltip({ x: p.x, y: p.y, node });
       } else {
         setTooltip(null);
@@ -462,13 +480,25 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
       const p = pos(e);
       pointers.delete(e.pointerId);
       if (pointers.size < 2) pinchStart = null;
-      if (pointers.size === 0) {
+      if (dragNode) {
+        const id = dragNode.id;
+        dragNode.fx = null;
+        dragNode.fy = null;
+        dragNode = null;
+        sim.alphaTarget(0);
+        canvas.style.cursor = "grab";
         if (!moved) {
-          const id = hitTest(p.x, p.y);
-          onSelect(id ?? null);
+          onSelect(id);
           setTooltip(null);
         }
-        dragStart = null;
+        return;
+      }
+      if (pointers.size === 0) {
+        if (!moved) {
+          onSelect(null);
+          setTooltip(null);
+        }
+        panStart = null;
       }
     };
 
@@ -511,6 +541,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
     container.addEventListener("braingraph:zoom", onZoom);
 
     return () => {
+      sim.stop();
       cancelAnimationFrame(raf);
       ro.disconnect();
       canvas.removeEventListener("pointerdown", onPointerDown);
@@ -521,7 +552,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
       canvas.removeEventListener("wheel", onWheel);
       container.removeEventListener("braingraph:zoom", onZoom);
     };
-  }, [layout, scene, nodes, onSelect]);
+  }, [graph, scene, nodes, onSelect]);
 
   const zoom = (action: string) => {
     containerRef.current?.dispatchEvent(
@@ -568,7 +599,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
               {STATUS_STYLE[tooltip.node.status].label}
             </span>
           </div>
-          <p className="mt-1 text-xs text-purple-100/60">Klicka för detaljer</p>
+          <p className="mt-1 text-xs text-purple-100/60">Dra för att flytta · klicka för detaljer</p>
         </div>
       )}
     </div>

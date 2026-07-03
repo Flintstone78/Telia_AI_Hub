@@ -53,14 +53,11 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
         }`}
       >
         <div className="mb-8 flex items-center gap-3 px-2">
-          {/* Logotyp: glödande sfär */}
+          {/* Telia-pebblen */}
           <div className="relative h-9 w-9">
-            <div className="absolute inset-0 rounded-full bg-purple-500 blur-md opacity-60" />
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-300 via-purple-500 to-purple-700">
-              <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                <path d="M4 13c4-3 12-3 16-1M5 16c4-2.5 10-2.5 14-1" />
-              </svg>
-            </div>
+            <div className="absolute inset-1 rounded-full bg-purple-500 blur-md opacity-50" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/telia-pebble.png" alt="Telia" className="relative h-9 w-9 object-contain" />
           </div>
           <div>
             <div className="font-heading text-lg leading-tight text-white">NAVET</div>

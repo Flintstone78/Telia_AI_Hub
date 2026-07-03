@@ -108,9 +108,11 @@ export default function NodeDetail({ node, allNodes, onSelect }: Props) {
               Uppdaterad: {updated}
             </span>
           )}
-          {node.url && node.status !== "idea" && (
+          {node.url && node.url !== "#" && (
             <a
               href={node.url}
+              target={node.url.startsWith("http") ? "_blank" : undefined}
+              rel={node.url.startsWith("http") ? "noreferrer" : undefined}
               className="ml-auto inline-flex items-center gap-2 rounded-full bg-purple-500 px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-purple-600"
             >
               Öppna

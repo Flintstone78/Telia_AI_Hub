@@ -21,6 +21,8 @@ export default function QuickAccess({ nodes, onSelect }: Props) {
           <a
             key={n.id}
             href={n.url ?? "#"}
+            target={n.url?.startsWith("http") ? "_blank" : undefined}
+            rel={n.url?.startsWith("http") ? "noreferrer" : undefined}
             onClick={(e) => {
               // "#" = ingen riktig länk ännu → markera i grafen i stället
               if (!n.url || n.url === "#") {

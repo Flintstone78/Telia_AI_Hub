@@ -15,10 +15,10 @@ export const nodes: Node[] = [
     description:
       "Bildgenerering och bildbearbetning med AI. Skapa, variera och anpassa bilder för kampanjer och presentationer.",
     status: "live",
-    url: "#",
+    url: "https://telia-image-studio.vercel.app/",
     tags: ["Bild", "Generering"],
     updatedAt: "2026-06-20",
-    connections: ["cd-agenten", "brief-agenten"],
+    connections: ["cd-agenten", "brief-generator"],
   },
   {
     id: "cd-agenten",
@@ -26,10 +26,10 @@ export const nodes: Node[] = [
     description:
       "Agent som vaktar den visuella identiteten — granskar material mot riktlinjerna för färg, typografi och ton.",
     status: "live",
-    url: "#",
+    url: "https://cd-agenten.vercel.app",
     tags: ["Varumärke", "Agent"],
     updatedAt: "2026-06-25",
-    connections: ["image-studio", "brief-agenten"],
+    connections: ["image-studio", "brief-generator"],
   },
   {
     id: "disc-profilering",
@@ -43,11 +43,12 @@ export const nodes: Node[] = [
     connections: ["analys-agenten"],
   },
   {
-    id: "brief-agenten",
-    name: "Brief-agenten",
+    id: "brief-generator",
+    name: "Brief Generator",
     description:
-      "Idé: agent som tar emot en rå brief och strukturerar den — mål, målgrupp, kanaler, leverabler — redo att jobba vidare på.",
+      "Agent som tar emot en rå brief och strukturerar den — mål, målgrupp, kanaler, leverabler. Byggs som en del av NAVET och bor på /brief.",
     status: "idea",
+    url: "/brief",
     tags: ["Agent", "Idé"],
     connections: ["cd-agenten", "image-studio"],
   },

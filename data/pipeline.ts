@@ -10,14 +10,14 @@ import type { PipelineItem } from "@/lib/types";
 export const pipeline: PipelineItem[] = [
   {
     date: "2026-07-15",
-    title: "Riktiga länkar till verktygen",
-    description: "Byt ut '#' mot skarpa URL:er för Image Studio, CD-agenten och DISC.",
+    title: "Riktig länk till DISC-profilering",
+    description: "Byt ut '#' mot skarp URL. Image Studio och CD-agenten är klara.",
     tag: "Underhåll",
   },
   {
     date: "2026-08-01",
-    title: "Brief-agenten — första utkast",
-    description: "Från idé till första körbara prototyp.",
+    title: "Brief Generator — första utkast",
+    description: "Byggs inom NAVET-repot, bor på /brief.",
     tag: "Nytt verktyg",
   },
   {

@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background-color: #0b0313;
+  color: #f4e0ff;
+  font-family: var(--font-telia), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Djup lila bakgrundsglöd — matchar den mörka referensen */
+.bg-glow {
+  background:
+    radial-gradient(1200px 700px at 55% 30%, rgba(153, 10, 227, 0.14), transparent 65%),
+    radial-gradient(900px 600px at 20% 80%, rgba(61, 0, 89, 0.5), transparent 70%),
+    radial-gradient(700px 500px at 85% 75%, rgba(180, 79, 234, 0.08), transparent 65%),
+    linear-gradient(180deg, #0b0313 0%, #120621 50%, #0b0313 100%);
+}
+
+.card {
+  @apply rounded-xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-sm;
+}
+
+.card-hover {
+  @apply transition-colors hover:border-purple-400/30 hover:bg-white/[0.06];
+}
+
+::selection {
+  background: rgba(153, 10, 227, 0.45);
+}
+
+/* Tunn scrollbar i mörkt tema */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(153, 10, 227, 0.35) transparent;
+}

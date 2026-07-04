@@ -28,7 +28,7 @@ export const nodes: Node[] = [
     status: "live",
     url: "https://cd-agenten.vercel.app",
     tags: ["Varumärke", "Agent"],
-    updatedAt: "2026-06-25",
+    updatedAt: "2026-07-03",
     connections: ["image-studio", "brief-generator"],
   },
   {

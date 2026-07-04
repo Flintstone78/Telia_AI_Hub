@@ -11,6 +11,7 @@ import NodeDetail from "@/components/NodeDetail";
 import Pipeline from "@/components/Pipeline";
 import QuickAccess from "@/components/QuickAccess";
 import AddContentModal from "@/components/AddContentModal";
+import ChatDock from "@/components/ChatDock";
 
 export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export default function Home() {
       <div className="min-w-0 flex-1">
         <TopBar query={query} onQueryChange={setQuery} onOpenMenu={() => setMenuOpen(true)} />
 
-        <main className="grid gap-4 p-4 sm:p-6 xl:grid-cols-[1fr_320px]">
+        <main className="grid gap-4 p-4 pb-28 sm:p-6 sm:pb-28 xl:grid-cols-[1fr_320px]">
           {/* Vänster/huvudkolumn */}
           <div className="min-w-0 space-y-4">
             <div className="flex flex-wrap items-end justify-between gap-3">
@@ -92,6 +93,7 @@ export default function Home() {
       </div>
 
       <AddContentModal open={addOpen} onClose={() => setAddOpen(false)} />
+      <ChatDock />
     </div>
   );
 }

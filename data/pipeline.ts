@@ -22,7 +22,7 @@ export const pipeline: PipelineItem[] = [
   },
   {
     date: "2026-09-01",
-    title: "Analys-agenten — konceptskiss",
+    title: "Dataanalys-agenten — konceptskiss",
     description: "Definiera datakällor och första användningsfall.",
     tag: "Idé",
   },

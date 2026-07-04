@@ -40,7 +40,7 @@ export const nodes: Node[] = [
     url: "#",
     tags: ["Analys", "Kommunikation"],
     updatedAt: "2026-06-12",
-    connections: ["analys-agenten"],
+    connections: ["dataanalys-agenten"],
   },
   {
     id: "brief-generator",
@@ -53,12 +53,39 @@ export const nodes: Node[] = [
     connections: ["cd-agenten", "image-studio"],
   },
   {
-    id: "analys-agenten",
-    name: "Analys-agenten",
+    id: "dataanalys-agenten",
+    name: "Dataanalys-agenten",
     description:
       "Idé: agent som läser in data och rapporter och sammanfattar insikter, trender och avvikelser på svenska.",
     status: "idea",
     tags: ["Analys", "Idé"],
-    connections: ["disc-profilering"],
+    connections: ["disc-profilering", "research-agenten", "cx-agenten"],
+  },
+  {
+    id: "research-agenten",
+    name: "Research-agenten",
+    description:
+      "Idé: agent som gör research på egen hand — samlar källor, sammanfattar läget och levererar ett underlag att agera på.",
+    status: "idea",
+    tags: ["Research", "Idé"],
+    connections: ["dataanalys-agenten", "brief-generator"],
+  },
+  {
+    id: "campaign-agenten",
+    name: "Telia Campaign-agenten",
+    description:
+      "Idé: agent för Telia-kampanjer — från brief till kampanjidéer, budskap och material, med varumärket inbyggt.",
+    status: "idea",
+    tags: ["Kampanj", "Idé"],
+    connections: ["brief-generator", "image-studio", "cd-agenten"],
+  },
+  {
+    id: "cx-agenten",
+    name: "Customer Experience-agenten",
+    description:
+      "Idé: agent som samlar vad vi vet om våra kunder — insikter, beteenden och behov — och gör det användbart i varje läge.",
+    status: "idea",
+    tags: ["Kundinsikt", "Idé"],
+    connections: ["dataanalys-agenten", "disc-profilering"],
   },
 ];

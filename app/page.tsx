@@ -12,6 +12,7 @@ import Pipeline from "@/components/Pipeline";
 import QuickAccess from "@/components/QuickAccess";
 import AddContentModal from "@/components/AddContentModal";
 import ChatDock from "@/components/ChatDock";
+import { useLocalIdeas } from "@/lib/useLocalIdeas";
 
 export default function Home() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -19,6 +20,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [greeting, setGreeting] = useState("Hej");
+  const { ideas, addIdea, removeIdea } = useLocalIdeas();
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -67,7 +69,7 @@ export default function Home() {
               </button>
             </div>
 
-            <StatsRow nodes={nodes} pipeline={pipeline} />
+            <StatsRow nodes={nodes} pipeline={[...pipeline, ...ideas]} />
 
             {/* HERO: partikelhjärnan */}
             <div className="card relative overflow-hidden">
@@ -86,7 +88,7 @@ export default function Home() {
 
           {/* Höger-kolumn */}
           <div className="space-y-4">
-            <Pipeline items={pipeline} />
+            <Pipeline items={pipeline} localIdeas={ideas} onAdd={addIdea} onRemove={removeIdea} />
             <QuickAccess nodes={nodes} onSelect={setSelectedId} />
           </div>
         </main>

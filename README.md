@@ -59,6 +59,14 @@ för hand.
 Färgerna per tagg definieras i `TAG_COLORS` i `components/Pipeline.tsx` —
 okända taggar får en standardfärg.
 
+### Idékön
+
+Pipeline-panelen har också ett inmatningsfält ("Lägg till idé i kön…").
+Idéer som skrivs in där sparas i webbläsarens localStorage — snabbt att
+fånga, men lokalt per enhet. När en idé ska bli permanent: lägg in den
+som en post i `data/pipeline.ts` (eller som en nod i `data/tools.ts`)
+och ta bort den ur kön.
+
 ## Deploy till Vercel
 
 Repot är deploy-klart som det är:

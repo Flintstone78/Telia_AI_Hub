@@ -46,10 +46,11 @@ export const nodes: Node[] = [
     id: "brief-generator",
     name: "Brief Generator",
     description:
-      "Agent som tar emot en rå brief och strukturerar den — mål, målgrupp, kanaler, leverabler. Byggs som en del av NAVET och bor på /brief.",
-    status: "idea",
+      "Samtalsagent som bygger en färdig kreativ brief: ställer följdfrågor, gör omvärldsanalys via webbsökning och fyller briefen sektion för sektion medan ni pratar. Bor på /brief.",
+    status: "beta",
     url: "/brief",
-    tags: ["Agent", "Idé"],
+    tags: ["Agent", "Brief"],
+    updatedAt: "2026-07-04",
     connections: ["cd-agenten", "image-studio"],
   },
   {

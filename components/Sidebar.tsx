@@ -23,7 +23,7 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
         onSelect(n.id);
         onClose();
       }}
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+      className={`pressable flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm ${
         selectedId === n.id
           ? "bg-purple-500/15 text-purple-50"
           : "text-purple-100/70 hover:bg-white/5 hover:text-purple-50"
@@ -31,7 +31,7 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
     >
       <span className={`h-2 w-2 shrink-0 rounded-full ${statusDotClass(n.status)}`} />
       <span className="flex-1 truncate">{n.name}</span>
-      <span className="text-[10px] uppercase tracking-wide text-purple-100/40">
+      <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-purple-100/45">
         {statusLabel(n.status)}
       </span>
     </button>
@@ -42,13 +42,13 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
       {/* Mobil-overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="animate-fade fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/[0.06] bg-ink-950/95 p-4 backdrop-blur transition-transform lg:static lg:z-auto lg:translate-x-0 lg:bg-transparent ${
+        className={`fixed inset-y-0 left-0 z-40 w-64 border-r border-white/[0.06] bg-ink-950/95 p-4 backdrop-blur-2xl transition-transform duration-300 ease-drawer lg:static lg:z-auto lg:translate-x-0 lg:bg-transparent ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -61,19 +61,19 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
           </div>
           <div>
             <div className="font-heading text-lg leading-tight text-white">NAVET</div>
-            <div className="text-[11px] text-purple-100/50">Min AI-hubb</div>
+            <div className="text-xs text-purple-100/55">Min AI-hubb</div>
           </div>
         </div>
 
         <nav className="space-y-6">
           <div>
-            <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wider text-purple-100/40">
+            <div className="eyebrow mb-2 px-3">
               Verktyg
             </div>
             <div className="space-y-0.5">{tools.map(item)}</div>
             {ideas.length > 0 && (
               <>
-                <div className="mb-2 mt-4 px-3 text-[11px] font-medium uppercase tracking-wider text-purple-100/40">
+                <div className="eyebrow mb-2 mt-4 px-3">
                   Idéer
                 </div>
                 <div className="space-y-0.5">{ideas.map(item)}</div>
@@ -82,7 +82,7 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
           </div>
 
           <div>
-            <div className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wider text-purple-100/40">
+            <div className="eyebrow mb-2 px-3">
               Inställningar
             </div>
             <button
@@ -90,7 +90,7 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
                 onOpenAdd();
                 onClose();
               }}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-purple-100/70 transition-colors hover:bg-white/5 hover:text-purple-50"
+              className="pressable flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-purple-100/70 hover:bg-white/5 hover:text-purple-50"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                 <path d="M12 5v14M5 12h14" />
@@ -101,7 +101,7 @@ export default function Sidebar({ nodes, selectedId, onSelect, onOpenAdd, open, 
               href="https://github.com/Flintstone78/Telia_AI_Hub"
               target="_blank"
               rel="noreferrer"
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-purple-100/70 transition-colors hover:bg-white/5 hover:text-purple-50"
+              className="pressable flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-purple-100/70 hover:bg-white/5 hover:text-purple-50"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />

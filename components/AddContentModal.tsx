@@ -35,11 +35,14 @@ export default function AddContentModal({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="animate-fade fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="card max-h-[85vh] w-full max-w-lg overflow-y-auto border-purple-400/20 bg-ink-900/95 px-6 py-5"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Lägg till innehåll"
+        className="surface animate-pop-in max-h-[85vh] w-full max-w-lg overflow-y-auto px-6 py-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
@@ -53,7 +56,7 @@ export default function AddContentModal({ open, onClose }: Props) {
           <button
             onClick={onClose}
             aria-label="Stäng"
-            className="rounded-md p-1.5 text-purple-100/60 hover:bg-white/5 hover:text-white"
+            className="btn btn-quiet btn-icon -mr-2 -mt-1 rounded-lg"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -74,7 +77,7 @@ export default function AddContentModal({ open, onClose }: Props) {
               {PIPELINE_SNIPPET}
             </pre>
           </div>
-          <p className="text-xs text-purple-100/50">
+          <p className="text-xs text-purple-100/55">
             Fullständig beskrivning finns i <code className="text-purple-200">README.md</code>.
           </p>
         </div>

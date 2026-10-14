@@ -577,7 +577,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
             title={b.title}
             aria-label={b.title}
             onClick={() => zoom(b.a)}
-            className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-ink-900/80 text-sm text-purple-100/80 backdrop-blur transition-colors hover:border-purple-400/40 hover:text-white"
+            className="btn h-8 w-8 rounded-lg border border-white/10 bg-ink-900/80 p-0 text-sm font-normal text-purple-100/80 backdrop-blur-xl hover:border-purple-400/40 hover:text-white"
           >
             {b.icon}
           </button>
@@ -587,7 +587,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
       {/* Hover-tooltip */}
       {tooltip && (
         <div
-          className="pointer-events-none absolute z-10 max-w-[240px] rounded-lg border border-purple-400/30 bg-ink-900/95 px-3 py-2 shadow-lg shadow-purple-900/40"
+          className="pointer-events-none absolute z-10 max-w-[240px] rounded-xl border border-white/10 bg-ink-900/90 px-3 py-2 shadow-xl shadow-black/40 backdrop-blur-xl"
           style={{
             left: Math.min(tooltip.x + 14, (containerRef.current?.clientWidth ?? 300) - 250),
             top: tooltip.y + 14,
@@ -595,7 +595,7 @@ export default function BrainGraph({ nodes, selectedId, onSelect, query }: Props
         >
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-purple-50">{tooltip.node.name}</span>
-            <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] uppercase tracking-wide text-purple-200">
+            <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.08em] text-purple-200">
               {STATUS_STYLE[tooltip.node.status].label}
             </span>
           </div>

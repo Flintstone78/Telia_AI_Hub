@@ -6,6 +6,8 @@ const config: Config = {
     "./components/**/*.{ts,tsx}",
     "./lib/**/*.{ts,tsx}",
   ],
+  // Hover-effekter bara på enheter med riktig pekare — annars fastnar de efter tryck på mobil
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {
@@ -40,6 +42,14 @@ const config: Config = {
         md: "8px",
         lg: "12px",
         xl: "16px",
+        "2xl": "20px",
+        "3xl": "28px",
+      },
+      transitionTimingFunction: {
+        DEFAULT: "cubic-bezier(0.23, 1, 0.32, 1)",
+        out: "cubic-bezier(0.23, 1, 0.32, 1)",
+        "in-out": "cubic-bezier(0.77, 0, 0.175, 1)",
+        drawer: "cubic-bezier(0.32, 0.72, 0, 1)",
       },
     },
   },

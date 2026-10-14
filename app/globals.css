@@ -4,6 +4,22 @@
 
 :root {
   color-scheme: dark;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Rörelseavstånd — nollas vid reducerad rörelse så att bara toningen blir kvar */
+  --enter-y: 6px;
+  --enter-blur: 4px;
+  --enter-scale: 0.97;
+  --press-scale: 0.97;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --enter-y: 0px;
+    --enter-blur: 0px;
+    --enter-scale: 1;
+    --press-scale: 1;
+  }
 }
 
 body {
@@ -11,6 +27,7 @@ body {
   color: #f4e0ff;
   font-family: var(--font-telia), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Djup lila bakgrundsglöd — matchar den mörka referensen */
@@ -22,12 +39,230 @@ body {
     linear-gradient(180deg, #0b0313 0%, #120621 50%, #0b0313 100%);
 }
 
-.card {
-  @apply rounded-xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-sm;
+@layer base {
+  /* Rubriktypsnittet vill ha lite tätare spärrning; större rubriker sätter egen tracking */
+  .font-heading {
+    letter-spacing: -0.01em;
+  }
 }
 
-.card-hover {
-  @apply transition-colors hover:border-purple-400/30 hover:bg-white/[0.06];
+@layer components {
+  .card {
+    @apply rounded-xl border border-white/[0.07] bg-white/[0.03] backdrop-blur-sm;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .card-hover {
+    @apply transition-colors hover:border-purple-400/30 hover:bg-white/[0.06];
+  }
+
+  /* Tyngre material för ytor som bär innehåll: briefen, chattpanelen, modaler, ark */
+  .surface {
+    @apply rounded-2xl border border-white/[0.08] bg-ink-900/75 backdrop-blur-2xl backdrop-saturate-150;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 24px 64px -24px rgba(0, 0, 0, 0.7),
+      0 8px 24px -12px rgba(41, 0, 62, 0.7);
+  }
+
+  /* Allt som går att trycka på svarar direkt på nedtryck */
+  .pressable,
+  .btn {
+    transition-property: transform, background-color, border-color, color, opacity, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: var(--ease-out);
+  }
+  .pressable:active:not(:disabled),
+  .btn:active:not(:disabled) {
+    transform: scale(var(--press-scale));
+    transition-duration: 100ms;
+  }
+
+  .btn {
+    @apply inline-flex shrink-0 select-none items-center justify-center gap-2 rounded-full font-medium outline-none focus-visible:ring-2 focus-visible:ring-purple-400/60 disabled:cursor-not-allowed;
+  }
+  .btn-sm {
+    @apply h-8 px-3.5 text-xs;
+  }
+  .btn-md {
+    @apply h-9 px-4 text-sm;
+  }
+  .btn-icon {
+    @apply h-9 w-9 p-0;
+  }
+  .btn-primary {
+    @apply bg-purple-500 text-white hover:bg-purple-600 disabled:bg-white/[0.06] disabled:text-purple-100/35;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 8px 24px -8px rgba(153, 10, 227, 0.6);
+  }
+  .btn-primary:disabled {
+    box-shadow: none;
+  }
+  .btn-ghost {
+    @apply border border-white/10 bg-white/[0.04] text-purple-100/75 hover:border-white/20 hover:bg-white/[0.07] hover:text-white disabled:opacity-40;
+  }
+  .btn-quiet {
+    @apply text-purple-100/60 hover:bg-white/[0.06] hover:text-white;
+  }
+
+  /* Små gruppetiketter: versaler kräver positiv spärrning och tillräcklig kontrast */
+  .eyebrow {
+    @apply text-[11px] font-medium uppercase tracking-[0.08em] text-purple-100/50;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-0.5 text-[11px] text-purple-100/65;
+  }
+
+  .field {
+    @apply rounded-full border border-white/10 bg-white/[0.04] text-sm text-purple-50 outline-none placeholder:text-purple-100/45;
+    transition: border-color 160ms var(--ease-out), background-color 160ms var(--ease-out),
+      box-shadow 160ms var(--ease-out);
+  }
+  .field:focus {
+    @apply border-purple-400/50 bg-white/[0.06];
+    box-shadow: 0 0 0 4px rgba(153, 10, 227, 0.14);
+  }
+
+  .composer {
+    @apply flex items-end gap-2 rounded-3xl border border-white/10 bg-ink-900/80 p-1.5 pl-4 backdrop-blur-2xl;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 12px 40px -16px rgba(41, 0, 62, 0.9);
+    transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  }
+  .composer:focus-within {
+    @apply border-purple-400/40;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 0 4px rgba(153, 10, 227, 0.12),
+      0 12px 40px -16px rgba(41, 0, 62, 0.9);
+  }
+
+  /* Innehåll tonar ut mot kanterna i stället för hårda avdelare */
+  .scroll-fade {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  }
+
+  .text-shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(244, 224, 255, 0.45) 0%,
+      rgba(244, 224, 255, 0.45) 35%,
+      #ffffff 50%,
+      rgba(244, 224, 255, 0.45) 65%,
+      rgba(244, 224, 255, 0.45) 100%
+    );
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 1.8s linear infinite;
+  }
+}
+
+@layer utilities {
+  .animate-rise {
+    animation: rise 240ms var(--ease-out) both;
+  }
+  .animate-reveal {
+    animation: reveal 360ms var(--ease-out) both;
+  }
+  .animate-pop-in {
+    animation: pop-in 220ms var(--ease-out) both;
+  }
+  .animate-fade {
+    animation: fade 200ms var(--ease-out) both;
+  }
+  .animate-glow {
+    animation: glow 1800ms var(--ease-out) both;
+  }
+  .animate-dot-pop {
+    animation: dot-pop 420ms var(--ease-out) both;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enter-y));
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--enter-y) * 0.66));
+    filter: blur(var(--enter-blur));
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--enter-y)) scale(var(--enter-scale));
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes glow {
+  0% {
+    background-color: rgba(153, 10, 227, 0.16);
+    box-shadow: inset 2px 0 0 #b44fea;
+  }
+  100% {
+    background-color: rgba(153, 10, 227, 0);
+    box-shadow: inset 2px 0 0 rgba(180, 79, 234, 0);
+  }
+}
+
+@keyframes dot-pop {
+  0% {
+    transform: scale(0.4);
+  }
+  55% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-shimmer {
+    animation: none;
+    color: rgba(244, 224, 255, 0.6);
+    background: none;
+  }
+  .animate-dot-pop {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .surface,
+  .composer {
+    @apply bg-ink-900 backdrop-blur-none;
+  }
+  .card {
+    @apply bg-ink-900 backdrop-blur-none;
+  }
 }
 
 ::selection {

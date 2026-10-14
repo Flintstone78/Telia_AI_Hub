@@ -51,16 +51,16 @@ export default function Home() {
           <div className="min-w-0 space-y-4">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h1 className="font-heading text-3xl text-white sm:text-4xl">
+                <h1 className="font-heading text-3xl leading-tight tracking-[-0.02em] text-white sm:text-4xl">
                   {greeting}, Fredrik 👋
                 </h1>
-                <p className="mt-1 text-sm text-purple-100/60">
+                <p className="mt-1.5 text-[15px] text-purple-100/60">
                   Dina AI-verktyg — byggda, i beta och på idéstadiet.
                 </p>
               </div>
               <button
                 onClick={() => setAddOpen(true)}
-                className="inline-flex items-center gap-2 rounded-full bg-purple-500 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-purple-500/25 transition-colors hover:bg-purple-600"
+                className="btn btn-md btn-primary"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M12 5v14M5 12h14" />
